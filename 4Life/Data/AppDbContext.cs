@@ -25,7 +25,7 @@ namespace _4Life.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string dbPath = Path.Combine(FileSystem.AppDataDirectory, "4life_database_2.db3");
+            string dbPath = Path.Combine(FileSystem.AppDataDirectory, "4life_database_7.db3");
             optionsBuilder.UseSqlite($"Filename={dbPath}");
         }
 
@@ -45,7 +45,7 @@ namespace _4Life.Data
 
             modelBuilder.Entity<Medicine>()
                 .HasOne(m => m.Patient)
-                .WithMany()
+                .WithMany(p => p.PrescribedMedicines)
                 .HasForeignKey(m => m.PatientId)
                 .OnDelete(DeleteBehavior.Cascade);
             

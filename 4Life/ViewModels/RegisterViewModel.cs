@@ -1,9 +1,11 @@
-﻿using _4Life.Models;
-using CommunityToolkit.Mvvm.Input;
+﻿using _4Life.Data;
+using _4Life.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
-using _4Life.Data;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +23,8 @@ namespace _4Life.ViewModels
         [ObservableProperty] private int? age;
         [ObservableProperty] private string medicalId;
         [ObservableProperty] private string specialization;
+        [ObservableProperty] private Doctor selectedDoctor;
+        public ObservableCollection<Doctor> AvailableDoctors { get; set; } = new();
 
 
         public List<string> Roles { get; } = new() { "Pacient", "Doctor" };
@@ -28,7 +32,14 @@ namespace _4Life.ViewModels
         public RegisterViewModel(AppDbContext context)
         {
             _context = context;
+            LoadDoctors();
         }
+
+        private async void LoadDoctors()
+        {
+            var doctors = await _context.Doctors.ToListAsync();
+            foreach (var d in doctors) AvailableDoctors.Add(d);
+}
         [RelayCommand]
         async Task RegisterUser()
         {
@@ -41,17 +52,15 @@ namespace _4Life.ViewModels
                     Role = this.selectedRole
                 };
 
-                _context.Users.Add(newUser);
-                await _context.SaveChangesAsync();
-
                 if (selectedRole == "Pacient")
                 {
                     var newPatient = new Patient
                     {
                         FullName = this.fullName,
-                        UserId = newUser.Id,
-                        //User = newUser,
-                        Age = this.age
+                        User = newUser, // Link the object directly [cite: 1]
+                        Age = this.age,
+                        // Assign the ID from the selected doctor object
+                        DoctorId = SelectedDoctor?.Id
                     };
                     _context.Patients.Add(newPatient);
                 }
@@ -60,8 +69,7 @@ namespace _4Life.ViewModels
                     var newDoctor = new Doctor
                     {
                         FullName = this.fullName,
-                        UserId = newUser.Id,
-                        //User = newUser,
+                        User = newUser,
                         MedicalId = this.medicalId,
                         Specialization = this.specialization
                     };
@@ -69,12 +77,14 @@ namespace _4Life.ViewModels
                 }
 
                 await _context.SaveChangesAsync();
-                await Shell.Current.DisplayAlert("Succes", "Account succesfully created!", "OK");
+                await Shell.Current.DisplayAlert("Success", "Account created!", "OK");
                 await Shell.Current.GoToAsync("//LoginPage");
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Error", "An error occured: " + ex.Message, "OK");
+                // This will tell us if it's a "FOREIGN KEY constraint failed" or "NOT NULL constraint"
+                var innerError = ex.InnerException?.Message ?? ex.Message;
+                await Shell.Current.DisplayAlert("Database Error", innerError, "OK");
             }
         }
         partial void OnSelectedRoleChanged(string value)

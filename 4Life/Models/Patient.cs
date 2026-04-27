@@ -15,8 +15,16 @@ namespace _4Life.Models
         public string FullName { get; set; }
         public string? CNP { get; set; }
         public int? Age { get; set; }
-        
+
+        public int? DoctorId { get; set; }
+        public Doctor? AssignedDoctor { get; set; }
+
         public int UserId { get; set; }
         public User User { get; set; }
+
+        public List<Medicine> PrescribedMedicines { get; set; } = new();
+
+        public string? emergencyMessage{  get; set; }
+        public bool? hasActiveAlert{  get; set; }
     }
 }

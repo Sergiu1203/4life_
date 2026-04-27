@@ -52,18 +52,24 @@
 
             <VerticalStackLayout IsVisible="{Binding IsDoctor}" Spacing="15">
             <Entry Placeholder="Specialization" 
-            Text="{Binding Specialization}" 
-            PlaceholderColor="{StaticResource Gray400}"/>
-                <Entry Placeholder="Medical License Number" 
-            Text="{Binding MedicalId}" 
-            PlaceholderColor="{StaticResource Gray400}"/>
+                   Text="{Binding Specialization}" 
+                   IsVisible="{Binding IsDoctor}"
+                   PlaceholderColor="{StaticResource Gray400}"/>
+
+            <Entry Placeholder="Medical License Number" 
+                   Text="{Binding MedicalId}" 
+                   IsVisible="{Binding IsDoctor}"
+                   PlaceholderColor="{StaticResource Gray400}"/>
             </VerticalStackLayout>
 
             <VerticalStackLayout IsVisible="{Binding IsPatient}" Spacing="15">
-            <Entry Placeholder="Age" 
-            Text="{Binding Age}" 
-            Keyboard="Numeric"
-            PlaceholderColor="{StaticResource Gray400}"/>
+                <Label Text="Choose your Doctor:" FontAttributes="Bold" />
+                <Picker Title="-- Select Doctor --" 
+            ItemsSource="{Binding AvailableDoctors}" 
+            ItemDisplayBinding="{Binding FullName}"
+            SelectedItem="{Binding SelectedDoctor}" />
+
+                <Entry Placeholder="Age" Text="{Binding Age}" Keyboard="Numeric" />
             </VerticalStackLayout>
 
             <Button Text="REGISTER" 

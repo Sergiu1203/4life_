@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:_4Life.ViewModels"
+             xmlns:models="clr-namespace:_4Life.Models"
+             x:Class="_4Life.Views.DashboardPage"
+             x:DataType="viewmodel:DashboardViewModel"
+             Title="4Life Dashboard"
+             BackgroundColor="White">
+
+    <Grid RowDefinitions="Auto, Auto, *, Auto" Padding="20" RowSpacing="15">
+
+        <VerticalStackLayout Grid.Row="0" Spacing="5">
+            <Label Text="{Binding UserName, StringFormat='Hello, {0}!'}" 
+                   FontSize="24" 
+                   FontAttributes="Bold" 
+                   TextColor="{StaticResource Primary}"/>
+            <Label Text="Your Medication Schedule for Today" 
+                   FontSize="14" 
+                   TextColor="{StaticResource Gray500}"/>
+        </VerticalStackLayout>
+
+        <Border Grid.Row="1" Padding="10" StrokeShape="RoundRectangle 10" BackgroundColor="{StaticResource Gray100}">
+            <Label Text="Check the boxes once you have taken your medicine." 
+                   FontSize="12" HorizontalOptions="Center" />
+        </Border>
+
+        <CollectionView Grid.Row="2" ItemsSource="{Binding DailyMeds}">
+            <CollectionView.EmptyView>
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="10">
+                    <Label Text="No medications prescribed yet." HorizontalOptions="Center" TextColor="Gray"/>
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Medicine">
+                    <Frame Margin="0,5" Padding="15" BorderColor="{StaticResource Gray200}" HasShadow="True">
+                        <Grid ColumnDefinitions="40, *, Auto">
+                            <Label Text="💊" FontSize="24" VerticalOptions="Center"/>
+
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Margin="10,0">
+                                <Label Text="{Binding Name}" FontAttributes="Bold" FontSize="18"/>
+
+                                <HorizontalStackLayout Spacing="5">
+                                    <Label Text="Dosage:" FontSize="12" TextColor="Gray"/>
+                                    <Label Text="{Binding Dosage}" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource Primary}"/>
+
+                                    <Label Text=" | " FontSize="12" TextColor="Gray"/>
+
+                                    <Label Text="{Binding TimeOfDay}" FontSize="12" TextColor="Gray"/>
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Spacing="5" Margin="0,2,0,0">
+                                    <Label Text="Current Stock:" FontSize="11" TextColor="Gray"/>
+                                    <Label Text="{Binding StockQuantity}" FontSize="11" FontAttributes="Bold" 
+                                           TextColor="{Binding StockQuantity, Converter={StaticResource StockToColorConverter}}"/>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+
+                            <CheckBox Grid.Column="2" 
+                                      IsChecked="{Binding IsTaken}" 
+                                      Color="{StaticResource Primary}"
+                                      CheckedChanged="OnMedicationCheckedChanged" 
+                            />
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <VerticalStackLayout Grid.Row="3" Spacing="10" Margin="0,10,0,0">
+            <Label Text="Need Help?" FontAttributes="Bold" HorizontalOptions="Center" TextColor="DarkRed"/>
+            <Grid ColumnDefinitions="*, *" ColumnSpacing="15">
+                <Button Grid.Column="0" 
+                        Text="ALERT DOCTOR" 
+                        Command="{Binding AlertDoctorCommand}"
+                        BackgroundColor="Orange" 
+                        TextColor="White" 
+                        FontAttributes="Bold"
+                        CornerRadius="15"/>
+
+                <Button Grid.Column="1" 
+                        Text="SOS CONTACT" 
+                        Command="{Binding SosContactCommand}"
+                        BackgroundColor="DarkRed" 
+                        TextColor="White" 
+                        FontAttributes="Bold"
+                        CornerRadius="15"/>
+            </Grid>
+        </VerticalStackLayout>
+
+    </Grid>
+</ContentPage>
