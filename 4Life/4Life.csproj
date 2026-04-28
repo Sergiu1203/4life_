@@ -13,7 +13,9 @@
 		either BOTH runtimes must be indicated or ONLY macatalyst-x64. -->
 		<!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
 
-		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+		<!-- EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk -->
+		<EmbedAssembliesIntoApk Condition="'$(Configuration)' == 'Release'">true</EmbedAssembliesIntoApk>
+		<EmbedAssembliesIntoApk Condition="'$(Configuration)' == 'Debug'">false</EmbedAssembliesIntoApk>
 		
 		<OutputType>Exe</OutputType>
 		<RootNamespace>_4Life</RootNamespace>
@@ -73,7 +75,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Update="Views\DashboardPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\DoctorDashboardPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Views\LoginPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\PrescribePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\RegisterPage.xaml">

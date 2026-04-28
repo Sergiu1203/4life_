@@ -13,8 +13,8 @@ namespace _4Life.Models
         public int Id { get; set; }
         [Required]
         public string FullName { get; set; }
-        public string Specialization { get; set; }
-        public string MedicalId { get; set; }
+        public string? Specialization { get; set; }
+        public string? MedicalId { get; set; }
 
         public int UserId { get; set; }
         public User User { get; set; }

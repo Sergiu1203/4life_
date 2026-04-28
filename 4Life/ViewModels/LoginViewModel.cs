@@ -25,13 +25,25 @@ public partial class LoginViewModel : ObservableObject
         var user = await _context.Users
             .FirstOrDefaultAsync(u => u.Email == this.email && u.Password == this.password);
 
-        if (user != null)
-        {
-            await Shell.Current.DisplayAlert("Succes", $"Welcome, {user.Role}!", "OK");
-        }
-        else
+        if (user == null)
         {
             await Shell.Current.DisplayAlert("Error", "Invalid email or password", "OK");
+            return;
+        }
+
+        Preferences.Default.Set("CurrentUserId", user.Id);
+        await Shell.Current.DisplayAlert("Success", $"Welcome, {user.Role}!", "OK");
+
+        if (user.Role == "Pacient")
+        {
+            var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == user.Id);
+            string displayName = patient?.FullName ?? user.Email;
+            await Shell.Current.GoToAsync($"//DashboardPage?name={displayName}");
+        }
+        else if (user.Role == "Doctor")
+        {
+            // await Shell.Current.GoToAsync("//DoctorDashboardPage");
+            await Shell.Current.GoToAsync("//DoctorDashboardPage");
         }
     }
 

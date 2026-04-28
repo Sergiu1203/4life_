@@ -30,6 +30,14 @@ namespace _4Life
             builder.Services.AddTransient<LoginPage>();
             builder.Services.AddTransient<LoginViewModel>();
 
+            builder.Services.AddTransient<DashboardPage>();
+            builder.Services.AddTransient<DashboardViewModel>();
+
+            builder.Services.AddTransient<DoctorDashboardPage>();
+            builder.Services.AddTransient<DoctorDashboardViewModel>();
+            builder.Services.AddTransient<PrescribePage>();
+            builder.Services.AddTransient<PrescribeViewModel>();
+
             return builder.Build();
         }
     }

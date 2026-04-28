@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:_4Life.ViewModels"
+             x:Class="_4Life.Views.PrescribePage"
+             x:DataType="viewmodel:PrescribeViewModel"
+             Title="{Binding PageTitle}"
+             BackgroundColor="White">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="20" Padding="30" VerticalOptions="Start">
+
+            <Label Text="Prescribe Medication" 
+                   FontSize="24" FontAttributes="Bold" 
+                   TextColor="{StaticResource Primary}" />
+
+            <Entry Placeholder="Medicine Name (e.g., Aspirin)" 
+                   Text="{Binding MedName}" />
+
+            <Entry Placeholder="Dosage (e.g., 1 tablet / 500mg)" 
+                   Text="{Binding Dosage}" />
+
+			<Entry Placeholder="Initial Stock Quantity (e.g., 30)"
+                   Text="{Binding InitialStock}"
+                   Keyboard="Numeric" />
+
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Schedule for:" FontAttributes="Bold" TextColor="Gray" />
+                <Picker Title="-- Select Time of Day --" 
+                        ItemsSource="{Binding TimeSlots}" 
+                        SelectedItem="{Binding SelectedTime}" />
+            </VerticalStackLayout>
+
+            <Button Text="SAVE PRESCRIPTION" 
+                    Command="{Binding SavePrescriptionCommand}"
+                    BackgroundColor="{StaticResource Primary}"
+                    TextColor="White"
+                    HeightRequest="50"
+                    CornerRadius="25"
+                    Margin="0,20,0,0" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
