@@ -38,6 +38,14 @@ namespace _4Life
             builder.Services.AddTransient<PrescribePage>();
             builder.Services.AddTransient<PrescribeViewModel>();
 
+            builder.Services.AddTransient<SymptomJournalPage>();
+            builder.Services.AddTransient<SymptomJournalViewModel>();
+
+            builder.Services.AddTransient<AdminDashboardPage>();
+            builder.Services.AddTransient<AdminDashboardViewModel>();
+            builder.Services.AddTransient<AdminEditPatientPage>();
+            builder.Services.AddTransient<AdminEditPatientViewModel>();
+
             return builder.Build();
         }
     }

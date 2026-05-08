@@ -7,6 +7,10 @@
              x:DataType="viewmodel:DashboardViewModel"
              Title="4Life Dashboard"
              BackgroundColor="White">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Logout" 
+                 Command="{Binding LogoutCommand}" />
+    </ContentPage.ToolbarItems>
 
     <Grid RowDefinitions="Auto, Auto, *, Auto" Padding="20" RowSpacing="15">
 
@@ -80,12 +84,12 @@
                         CornerRadius="15"/>
 
                 <Button Grid.Column="1" 
-                        Text="SOS CONTACT" 
-                        Command="{Binding SosContactCommand}"
-                        BackgroundColor="DarkRed" 
+                        Text="SYMPTOM JOURNAL" 
+                        Command="{Binding GoToJournalCommand}"
+                        BackgroundColor="#2B3A67" 
                         TextColor="White" 
                         FontAttributes="Bold"
-                        CornerRadius="15"/>
+                        CornerRadius="10"/>
             </Grid>
         </VerticalStackLayout>
 

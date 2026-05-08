@@ -27,8 +27,8 @@
             <VerticalStackLayout Spacing="5">
                 <Label Text="Schedule for:" FontAttributes="Bold" TextColor="Gray" />
                 <Picker Title="-- Select Time of Day --" 
-                        ItemsSource="{Binding TimeSlots}" 
-                        SelectedItem="{Binding SelectedTime}" />
+            ItemsSource="{Binding TimeSlots}" 
+            SelectedItem="{Binding SelectedTime}" />
             </VerticalStackLayout>
 
             <Button Text="SAVE PRESCRIPTION" 

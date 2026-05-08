@@ -32,4 +32,10 @@
         ContentTemplate="{DataTemplate views:DoctorDashboardPage}"
         Route="DoctorDashboardPage" />
 
+    <ShellContent
+    Title="Admin Dashboard"
+    ContentTemplate="{DataTemplate views:AdminDashboardPage}"
+    Route="AdminDashboardPage"
+    FlyoutItemIsVisible="False" />
+
 </Shell>

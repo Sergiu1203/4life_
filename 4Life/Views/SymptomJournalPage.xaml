@@ -1,0 +1,54 @@
+﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:_4Life.ViewModels"
+             xmlns:models="clr-namespace:_4Life.Models"
+             x:Class="_4Life.Views.SymptomJournalPage"
+             x:DataType="viewmodel:SymptomJournalViewModel"
+             Title="My Health Journal">
+
+   
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+
+            <Label Text="How are you feeling?" FontSize="22" FontAttributes="Bold" />
+            <Label Text="Describe your symptoms or notes for the doctor below:" FontSize="14" TextColor="Gray" />
+
+            <Frame BorderColor="#D1D1D1" CornerRadius="10" Padding="5">
+                <Editor Text="{Binding JournalText, Mode=TwoWay}" 
+                        Placeholder="Enter your notes here..."
+                        HeightRequest="250"
+                        AutoSize="TextChanges" />
+            </Frame>
+
+            <Button Text="SAVE JOURNAL ENTRY" 
+                    Command="{Binding SaveJournalCommand}" 
+                    BackgroundColor="#4CAF50" 
+                    TextColor="White" 
+                    CornerRadius="10"
+                    FontAttributes="Bold"/>
+
+            <BoxView HeightRequest="1" Color="LightGray" Margin="0,10" />
+
+            <Label Text="Medications Taken Today" FontSize="18" FontAttributes="Bold" />
+
+            <CollectionView ItemsSource="{Binding TakenMedsHistory}">
+                <CollectionView.EmptyView>
+                    <Label Text="No medications marked as taken yet." HorizontalOptions="Center" Margin="20" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Medicine">
+                        <Frame Margin="0,5" Padding="10" BorderColor="#E0E0E0">
+                            <HorizontalStackLayout Spacing="10">
+                                <Label Text="✅" VerticalOptions="Center"/>
+                                <Label Text="{Binding Name}" FontAttributes="Bold" VerticalOptions="Center"/>
+                                <Label Text="-" VerticalOptions="Center"/>
+                                <Label Text="{Binding Dosage}" VerticalOptions="Center" TextColor="DimGray"/>
+                            </HorizontalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

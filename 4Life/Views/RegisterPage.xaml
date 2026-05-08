@@ -39,6 +39,12 @@
                    Text="{Binding Password}" 
                    IsPassword="True"
                    PlaceholderColor="{StaticResource Gray400}"/>
+            
+            <Label Text="{Binding PasswordStrengthMessage}"
+                   TextColor="{Binding StrengthColor}"
+                   FontSize="12"
+                   FontAttributes="Italic"
+                   Margin="5,-10,0,0" />
 
             <Label Text="Select your role:" 
                    TextColor="{StaticResource Secondary}" 

@@ -40,5 +40,6 @@ namespace _4Life.Models
 
         [ObservableProperty]
         private bool isTaken;
+
     }
 }
