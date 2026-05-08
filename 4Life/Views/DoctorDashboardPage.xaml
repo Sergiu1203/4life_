@@ -6,6 +6,10 @@
              x:Class="_4Life.Views.DoctorDashboardPage"
              x:DataType="viewmodel:DoctorDashboardViewModel"
              Title="Doctor Portal">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Logout" 
+                 Command="{Binding LogoutCommand}" />
+    </ContentPage.ToolbarItems>
 
     <Grid RowDefinitions="Auto, *" Padding="20">
 

@@ -169,5 +169,23 @@ namespace _4Life.ViewModels
                 }
             }
         }
+
+        [RelayCommand]
+        async Task Logout()
+        {
+            // 1. Afișăm fereastra de confirmare
+            bool answer = await Shell.Current.DisplayAlert("Logout",
+                "Are you sure you want to logout?", "Yes", "No");
+
+            // 2. Dacă utilizatorul a ales "Yes" (true), procedăm la logout
+            if (answer)
+            {
+                // Ștergem ID-ul salvat
+                Preferences.Default.Remove("CurrentUserId");
+
+                // Navigăm înapoi la pagina de Login folosind ruta absolută
+                await Shell.Current.GoToAsync("//LoginPage");
+            }
+        }
     }
 }

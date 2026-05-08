@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:_4Life.ViewModels"
+             x:Class="_4Life.Views.AdminEditPatientPage"
+             x:DataType="viewmodel:AdminEditPatientViewModel"
+             Title="Edit Patient Profile">
+
+    <VerticalStackLayout Padding="30" Spacing="20">
+        <Label Text="Edit Patient Information" 
+               FontSize="24" 
+               FontAttributes="Bold"
+               
+               HorizontalOptions="Center" />
+
+        <VerticalStackLayout Spacing="5">
+            <Label Text="Full Name" FontAttributes="Bold" />
+            <Entry Text="{Binding Name}" Placeholder="Enter full name" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="5">
+            <Label Text="Email Address" FontAttributes="Bold" />
+            <Entry Text="{Binding Email}" Placeholder="Enter email" Keyboard="Email" />
+        </VerticalStackLayout>
+
+        <Button Text="SAVE CHANGES" 
+                Command="{Binding SaveChangesCommand}"
+                BackgroundColor="#2196F3"
+                TextColor="White"
+                HeightRequest="50"
+                CornerRadius="10"
+                Margin="0,20,0,0" />
+
+        <Button Text="CANCEL" 
+                Command="{Binding CancelCommand}"
+                BackgroundColor="Transparent"
+                TextColor="Gray"
+                HorizontalOptions="Center" />
+    </VerticalStackLayout>
+</ContentPage>

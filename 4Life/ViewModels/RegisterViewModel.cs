@@ -24,15 +24,66 @@ namespace _4Life.ViewModels
         [ObservableProperty] private string medicalId;
         [ObservableProperty] private string specialization;
         [ObservableProperty] private Doctor selectedDoctor;
+
+        [ObservableProperty]
+        private string passwordStrengthMessage = "The password has to be minimum 8 characters long and contain upper case and lower case letters, numbers and special characters";
+
+        [ObservableProperty]
+        private Color strengthColor = Colors.Gray;
         public ObservableCollection<Doctor> AvailableDoctors { get; set; } = new();
 
-
-        public List<string> Roles { get; } = new() { "Pacient", "Doctor" };
+        
+        public List<string> Roles { get; } = new() { "Patient", "Doctor" };
 
         public RegisterViewModel(AppDbContext context)
         {
             _context = context;
             LoadDoctors();
+        }
+
+        partial void OnPasswordChanged(string value)
+        {
+            UpdatePasswordStrength(value);
+        }
+
+        private void UpdatePasswordStrength(string pwd)
+        {
+            if (string.IsNullOrEmpty(pwd))
+            {
+                PasswordStrengthMessage = "Password is required";
+                StrengthColor = Colors.Gray;
+                return;
+            }
+
+            if (pwd.Length < 8)
+            {
+                PasswordStrengthMessage = "Too short (min 8 characters)";
+                StrengthColor = Colors.Red;
+                return;
+            }
+
+            bool hasUpper = pwd.Any(char.IsUpper);
+            bool hasLower = pwd.Any(char.IsLower);
+            bool hasDigit = pwd.Any(char.IsDigit);
+            bool hasSpecial = pwd.Any(ch => !char.IsLetterOrDigit(ch));
+
+            int criteriaMet = (hasUpper ? 1 : 0) + (hasLower ? 1 : 0) + (hasDigit ? 1 : 0) + (hasSpecial ? 1 : 0);
+
+            if (criteriaMet <= 2)
+            {
+                PasswordStrengthMessage = "Weak password (add symbols/numbers)";
+                StrengthColor = Colors.Orange;
+            }
+            else if (criteriaMet == 3)
+            {
+                PasswordStrengthMessage = "Medium password";
+                StrengthColor = Colors.YellowGreen;
+            }
+            else if (criteriaMet == 4)
+            {
+                PasswordStrengthMessage = "Strong password";
+                StrengthColor = Colors.Green;
+            }
         }
 
         private async void LoadDoctors()
@@ -43,6 +94,24 @@ namespace _4Life.ViewModels
         [RelayCommand]
         async Task RegisterUser()
         {
+            if (string.IsNullOrWhiteSpace(Email) || !Email.Contains("@"))
+            {
+                await Shell.Current.DisplayAlert("Error", "Please enter a valid email address containing '@'", "OK");
+                return;
+            }
+
+            bool isValidPassword = Password?.Length >= 8 &&
+                                   Password.Any(char.IsUpper) &&
+                                   Password.Any(char.IsLower) &&
+                                   Password.Any(char.IsDigit) &&
+                                   Password.Any(ch => !char.IsLetterOrDigit(ch));
+
+            if (!isValidPassword)
+            {
+                await Shell.Current.DisplayAlert("Weak Password",
+                    "Password must be at least 8 characters long and contain: Uppercase, Lowercase, Number, and Special Character.", "OK");
+                return;
+            }
             try
             {
                 var newUser = new User
@@ -52,7 +121,7 @@ namespace _4Life.ViewModels
                     Role = this.selectedRole
                 };
 
-                if (selectedRole == "Pacient")
+                if (selectedRole == "Patient")
                 {
                     var newPatient = new Patient
                     {
@@ -94,6 +163,6 @@ namespace _4Life.ViewModels
         }
 
         public bool IsDoctor => SelectedRole == "Doctor";
-        public bool IsPatient => SelectedRole == "Pacient";
+        public bool IsPatient => SelectedRole == "Patient";
     }
 }

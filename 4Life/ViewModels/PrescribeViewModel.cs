@@ -59,55 +59,9 @@ namespace _4Life.ViewModels
                 SelectedTime = med.TimeOfDay;
                 InitialStock = med.StockQuantity.ToString();
                 PatientId = med.PatientId;
+               
             }
         }
-
-        /*
-        [RelayCommand]
-        private async Task SavePrescription()
-        {
-            // Use the generated Property (Capital P)
-            if (PatientId == 0)
-            {
-                await Shell.Current.DisplayAlert("Error", "Patient ID is 0. Navigation failed to pass data.", "OK");
-                return;
-            }
-
-            try
-            {
-                int currentUserId = Preferences.Default.Get("CurrentUserId", 0);
-                var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == currentUserId);
-
-                var newMed = new Medicine
-                {
-                    Name = MedName, // Use Generated Property
-                    Dosage = Dosage,
-                    TimeOfDay = SelectedTime,
-                    PatientId = PatientId, // Use Generated Property
-                    PrescribedByDoctorId = doctor?.Id,
-                    TargetDate = DateTime.Today,
-                    StockQuantity = int.TryParse(this.initialStock, out int s) ? s : 30,
-                    IsTaken = false,
-                    Category = "Prescription",
-                    ExpiryDate = DateTime.Today.AddYears(1) // Ensure no null constraints on Expiry
-                };
-
-                _context.Medicines.Add(newMed);
-                await _context.SaveChangesAsync();
-
-                await Shell.Current.DisplayAlert("Success", "Medication added!", "OK");
-
-                // This is what closes the page!
-                await Shell.Current.GoToAsync("..");
-            }
-            catch (Exception ex)
-            {
-                var message = ex.InnerException?.Message ?? ex.Message;
-                await Shell.Current.DisplayAlert("Database Error", message, "OK");
-            }
-        }
-
-        */
 
         [RelayCommand]
         private async Task SavePrescription()
@@ -164,6 +118,6 @@ namespace _4Life.ViewModels
                 await Shell.Current.DisplayAlert("Database Error", message, "OK");
             }
         }
-
+ 
     }
 }

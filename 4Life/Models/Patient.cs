@@ -26,5 +26,7 @@ namespace _4Life.Models
 
         public string? emergencyMessage{  get; set; }
         public bool? hasActiveAlert{  get; set; }
+
+        public string? JournalNotes { get; set; }
     }
 }

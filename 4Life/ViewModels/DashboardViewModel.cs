@@ -33,7 +33,7 @@ namespace _4Life.ViewModels
                 DailyMeds.Add(item);
         }*/
 
-        public async Task LoadPatientData(int userId)
+       public async Task LoadPatientData(int userId)
         {
             // 1. Check if the User -> Patient link exists
             var patient = await _context.Patients
@@ -83,6 +83,13 @@ namespace _4Life.ViewModels
         public async Task ToggleMedicationTaken(Medicine med)
         {
             if (med == null) return;
+
+            var dbMed = await _context.Medicines.AsNoTracking().FirstOrDefaultAsync(m => m.Id == med.Id);
+
+            if (dbMed != null && dbMed.IsTaken == med.IsTaken)
+            {
+                return;
+            }
 
             int amountTaken = 1;
             var match = System.Text.RegularExpressions.Regex.Match(med.Dosage, @"\d+");
@@ -154,6 +161,30 @@ namespace _4Life.ViewModels
             string phoneNumber = "0722123456";
             if (PhoneDialer.Default.IsSupported)
                 PhoneDialer.Default.Open(phoneNumber);
+        }
+
+        [RelayCommand]
+        async Task GoToJournal()
+        {
+            await Shell.Current.GoToAsync("SymptomJournalPage");
+        }
+
+        [RelayCommand]
+        async Task Logout()
+        {
+            // 1. Afișăm fereastra de confirmare
+            bool answer = await Shell.Current.DisplayAlert("Logout",
+                "Are you sure you want to logout?", "Yes", "No");
+
+            // 2. Dacă utilizatorul a ales "Yes" (true), procedăm la logout
+            if (answer)
+            {
+                // Ștergem ID-ul salvat
+                Preferences.Default.Remove("CurrentUserId");
+
+                // Navigăm înapoi la pagina de Login folosind ruta absolută
+                await Shell.Current.GoToAsync("//LoginPage");
+            }
         }
     }
 }
