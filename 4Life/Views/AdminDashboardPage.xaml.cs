@@ -1,9 +1,4 @@
-﻿using _4Life.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using _4Life.ViewModels;
 
 namespace _4Life.Views
 {
@@ -14,19 +9,14 @@ namespace _4Life.Views
         public AdminDashboardPage(AdminDashboardViewModel viewModel)
         {
             InitializeComponent();
-            // Setăm BindingContext pentru a face legătura cu XAML
             BindingContext = _viewModel = viewModel;
         }
 
         protected override async void OnAppearing()
         {
             base.OnAppearing();
-
-            // Reîncărcăm lista de pacienți de fiecare dată când pagina apare
             if (_viewModel != null)
-            {
-                await _viewModel.LoadAllPatients();
-            }
+                await _viewModel.LoadAllData();
         }
     }
 }

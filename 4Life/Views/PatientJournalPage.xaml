@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:_4Life.ViewModels"
+             x:Class="_4Life.Views.PatientJournalPage"
+             x:DataType="viewmodel:PatientJournalViewModel"
+             BackgroundColor="White">
+
+    <!-- Titlul dinamic cu numele pacientului -->
+    <ContentPage.Title>
+        <Binding Path="PatientName" StringFormat="{}{0}'s Journal"/>
+    </ContentPage.Title>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="22">
+
+            <!-- ===== DAILY CHECK-IN HISTORY ===== -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="📋 Daily Check-in History"
+                       FontSize="20" FontAttributes="Bold"
+                       TextColor="{StaticResource Primary}"/>
+
+                <Label IsVisible="{Binding HasCheckInHistory, Converter={StaticResource InverseBoolConverter}}"
+                       Text="No daily check-ins recorded yet."
+                       TextColor="Gray" FontSize="13"/>
+
+                <VerticalStackLayout IsVisible="{Binding HasCheckInHistory}" Spacing="6">
+                    <Label Text="Last 14 entries, most recent first."
+                           FontSize="12" TextColor="Gray"/>
+                    <Frame Padding="15"
+                           BackgroundColor="{StaticResource Gray100}"
+                           BorderColor="Transparent"
+                           CornerRadius="12">
+                        <Label Text="{Binding CheckInHistory}"
+                               FontSize="13" LineHeight="1.6"
+                               TextColor="{StaticResource Gray600}"/>
+                    </Frame>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <BoxView HeightRequest="1" Color="{StaticResource Gray200}"/>
+
+            <!-- ===== MEDICAMENTE LUATE AZI ===== -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="💊 Medications Taken Today"
+                       FontSize="20" FontAttributes="Bold"
+                       TextColor="{StaticResource Primary}"/>
+
+                <CollectionView ItemsSource="{Binding TakenMedsToday}">
+                    <CollectionView.EmptyView>
+                        <Label Text="No medications marked as taken today."
+                               TextColor="Gray" FontSize="13" Margin="0,5"/>
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="viewmodel:TakenMedEntry">
+                            <Frame Margin="0,4" Padding="12,10"
+                                   BorderColor="{StaticResource Gray200}"
+                                   CornerRadius="10" HasShadow="False">
+                                <Grid ColumnDefinitions="Auto, *, Auto">
+                                    <Label Grid.Column="0"
+                                           Text="{Binding MealEmoji}"
+                                           FontSize="22" VerticalOptions="Center"/>
+                                    <VerticalStackLayout Grid.Column="1"
+                                                         Margin="10,0" Spacing="1"
+                                                         VerticalOptions="Center">
+                                        <Label Text="{Binding Name}"
+                                               FontAttributes="Bold" FontSize="15"/>
+                                        <Label Text="{Binding Dosage}"
+                                               FontSize="12" TextColor="Gray"/>
+                                    </VerticalStackLayout>
+                                    <Frame Grid.Column="2"
+                                           Padding="8,3"
+                                           BackgroundColor="{StaticResource Primary}"
+                                           BorderColor="Transparent"
+                                           CornerRadius="8"
+                                           VerticalOptions="Center">
+                                        <Label Text="{Binding MealTime}"
+                                               FontSize="11" FontAttributes="Bold"
+                                               TextColor="White"/>
+                                    </Frame>
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+
+            <BoxView HeightRequest="1" Color="{StaticResource Gray200}"/>
+
+            <!-- ===== NOTE MANUALE ALE PACIENTULUI ===== -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="📝 Patient's Personal Notes"
+                       FontSize="20" FontAttributes="Bold"
+                       TextColor="{StaticResource Primary}"/>
+
+                <Label IsVisible="{Binding HasManualNotes, Converter={StaticResource InverseBoolConverter}}"
+                       Text="The patient hasn't written any personal notes yet."
+                       TextColor="Gray" FontSize="13"/>
+
+                <Frame IsVisible="{Binding HasManualNotes}"
+                       Padding="15"
+                       BackgroundColor="{StaticResource Gray100}"
+                       BorderColor="Transparent"
+                       CornerRadius="12">
+                    <Label Text="{Binding ManualNotes}"
+                           FontSize="14" LineHeight="1.6"
+                           TextColor="{StaticResource Gray600}"/>
+                </Frame>
+            </VerticalStackLayout>
+
+            <BoxView HeightRequest="1" Color="{StaticResource Gray200}"/>
+
+            <!-- ===== MESAJE CHAT TRIMISE DE PACIENT ===== -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding HasAlertHistory}">
+                <Label Text="💬 Recent Messages from Patient"
+                       FontSize="20" FontAttributes="Bold"
+                       TextColor="{StaticResource Primary}"/>
+
+                <Frame Padding="15"
+                       BackgroundColor="#FFF3E0"
+                       BorderColor="Transparent"
+                       CornerRadius="12">
+                    <Label Text="{Binding AlertHistory}"
+                           FontSize="13" LineHeight="1.6"
+                           TextColor="#5D4037"/>
+                </Frame>
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

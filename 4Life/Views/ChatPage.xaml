@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:_4Life.ViewModels"
+             xmlns:models="clr-namespace:_4Life.Models"
+             x:Class="_4Life.Views.ChatPage"
+             x:DataType="viewmodel:ChatViewModel"
+             Title="{Binding ChatTitle}"
+             BackgroundColor="White">
+
+    <Grid RowDefinitions="*, Auto" Padding="10">
+
+        <!-- Lista mesaje -->
+        <CollectionView Grid.Row="0"
+                        x:Name="MessagesCollection"
+                        ItemsSource="{Binding Messages}">
+            <CollectionView.EmptyView>
+                <Label Text="No messages yet. Start the conversation!"
+                       HorizontalOptions="Center" VerticalOptions="Center"
+                       TextColor="Gray" Margin="20"/>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:ChatMessage">
+                    <Grid Padding="8,4">
+
+                        <!--
+                            Logica de aliniere:
+                            - IsSentByMe = true  → mesajul e al utilizatorului curent → DREAPTA (verde)
+                            - IsSentByMe = false → mesajul e al celuilalt              → STÂNGA (gri)
+                        -->
+
+                        <!-- Mesaj propriu — DREAPTA -->
+                        <Frame IsVisible="{Binding IsSentByMe}"
+                               BackgroundColor="#DCF8C6"
+                               BorderColor="Transparent"
+                               CornerRadius="14"
+                               Padding="12,8"
+                               HorizontalOptions="End"
+                               MaximumWidthRequest="270">
+                            <VerticalStackLayout Spacing="3">
+                                <Label Text="{Binding Content}"
+                                       FontSize="14" TextColor="Black"/>
+                                <Label Text="{Binding SentAt, StringFormat='{0:dd MMM HH:mm}'}"
+                                       FontSize="10" TextColor="#666"
+                                       HorizontalOptions="End"/>
+                            </VerticalStackLayout>
+                        </Frame>
+
+                        <!-- Mesaj al celuilalt — STÂNGA -->
+                        <Frame IsVisible="{Binding IsReceivedByMe}"
+                               BackgroundColor="#EFEFEF"
+                               BorderColor="Transparent"
+                               CornerRadius="14"
+                               Padding="12,8"
+                               HorizontalOptions="Start"
+                               MaximumWidthRequest="270">
+                            <VerticalStackLayout Spacing="3">
+                                <Label Text="{Binding SenderLabel}"
+                                       FontSize="11" FontAttributes="Bold"
+                                       TextColor="{StaticResource Primary}"/>
+                                <Label Text="{Binding Content}"
+                                       FontSize="14" TextColor="Black"/>
+                                <Label Text="{Binding SentAt, StringFormat='{0:dd MMM HH:mm}'}"
+                                       FontSize="10" TextColor="#666"
+                                       HorizontalOptions="End"/>
+                            </VerticalStackLayout>
+                        </Frame>
+
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Input trimitere mesaj -->
+        <Grid Grid.Row="1"
+              ColumnDefinitions="*, Auto"
+              ColumnSpacing="8"
+              Padding="5,8"
+              BackgroundColor="{StaticResource Gray100}">
+
+            <Entry Grid.Column="0"
+                   Placeholder="Type a message..."
+                   Text="{Binding NewMessage}"
+                   ReturnCommand="{Binding SendMessageCommand}"
+                   VerticalOptions="Center"/>
+
+            <Button Grid.Column="1"
+                    Text="Send"
+                    Command="{Binding SendMessageCommand}"
+                    BackgroundColor="{StaticResource Primary}"
+                    TextColor="White"
+                    CornerRadius="20"
+                    HeightRequest="44"
+                    WidthRequest="70"/>
+        </Grid>
+    </Grid>
+</ContentPage>
