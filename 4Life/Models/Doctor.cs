@@ -1,9 +1,5 @@
-﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace _4Life.Models
 {
@@ -11,8 +7,10 @@ namespace _4Life.Models
     {
         [Key]
         public int Id { get; set; }
+
         [Required]
         public string FullName { get; set; }
+
         public string? Specialization { get; set; }
         public string? MedicalId { get; set; }
 
@@ -20,5 +18,11 @@ namespace _4Life.Models
         public User User { get; set; }
 
         public List<Medicine> PrescribedMedicines { get; set; } = new();
+
+        // Relatie many-to-many cu pacientii
+        public List<PatientDoctor> PatientDoctors { get; set; } = new();
+
+        // Mesaje chat
+        public List<ChatMessage> ChatMessages { get; set; } = new();
     }
 }

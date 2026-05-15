@@ -1,97 +1,134 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:_4Life.ViewModels"
              x:Class="_4Life.Views.RegisterPage"
+             x:DataType="viewmodel:RegisterViewModel"
              Title="Register"
              BackgroundColor="White">
 
     <ScrollView>
         <VerticalStackLayout Spacing="15" Padding="30" VerticalOptions="Center">
 
-            <Border HorizontalOptions="Center"
-                    StrokeThickness="0"
-                    Margin="0,0,0,10">
+            <!-- Logo -->
+            <Border HorizontalOptions="Center" StrokeThickness="0" Margin="0,0,0,10">
                 <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="100" />
+                    <RoundRectangle CornerRadius="100"/>
                 </Border.StrokeShape>
-
                 <Image Source="logo.jpeg"
-                        HeightRequest="150"
-                        WidthRequest="150"
-                        Aspect="AspectFill" />
+                       HeightRequest="150" WidthRequest="150"
+                       Aspect="AspectFill"/>
             </Border>
 
-            <Label  Text="Create your 4Life Account" 
-                    FontSize="24" FontAttributes="Bold"
-                    HorizontalOptions="Center" 
-                    TextColor="{StaticResource Primary}" Margin="0,0,0,20"/>
+            <Label Text="Create your 4Life Account"
+                   FontSize="24" FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   TextColor="{StaticResource Primary}"
+                   Margin="0,0,0,20"/>
 
-            <Entry Placeholder="Full Name" 
-                   Text="{Binding FullName}" 
+            <!-- Campuri comune -->
+            <Entry Placeholder="Full Name"
+                   Text="{Binding FullName}"
                    PlaceholderColor="{StaticResource Gray400}"/>
 
-            <Entry Placeholder="Email Address" 
-                   Text="{Binding Email}" 
+            <Entry Placeholder="Email Address"
+                   Text="{Binding Email}"
                    Keyboard="Email"
                    PlaceholderColor="{StaticResource Gray400}"/>
 
-            <Entry Placeholder="Password" 
-                   Text="{Binding Password}" 
+            <Entry Placeholder="Password"
+                   Text="{Binding Password}"
                    IsPassword="True"
                    PlaceholderColor="{StaticResource Gray400}"/>
-            
+
             <Label Text="{Binding PasswordStrengthMessage}"
                    TextColor="{Binding StrengthColor}"
-                   FontSize="12"
-                   FontAttributes="Italic"
-                   Margin="5,-10,0,0" />
+                   FontSize="12" FontAttributes="Italic"
+                   Margin="5,-10,0,0"/>
 
-            <Label Text="Select your role:" 
-                   TextColor="{StaticResource Secondary}" 
-                   FontAttributes="Bold" 
+            <Label Text="Select your role:"
+                   TextColor="{StaticResource Secondary}"
+                   FontAttributes="Bold"
                    Margin="0,10,0,0"/>
 
-            <Picker Title="-- Choose Role --" 
-                    ItemsSource="{Binding Roles}" 
+            <Picker Title="-- Choose Role --"
+                    ItemsSource="{Binding Roles}"
                     SelectedItem="{Binding SelectedRole}"
                     TextColor="{StaticResource Primary}"/>
 
+            <!-- Campuri Doctor -->
             <VerticalStackLayout IsVisible="{Binding IsDoctor}" Spacing="15">
-            <Entry Placeholder="Specialization" 
-                   Text="{Binding Specialization}" 
-                   IsVisible="{Binding IsDoctor}"
-                   PlaceholderColor="{StaticResource Gray400}"/>
-
-            <Entry Placeholder="Medical License Number" 
-                   Text="{Binding MedicalId}" 
-                   IsVisible="{Binding IsDoctor}"
-                   PlaceholderColor="{StaticResource Gray400}"/>
+                <Entry Placeholder="Specialization"
+                       Text="{Binding Specialization}"
+                       PlaceholderColor="{StaticResource Gray400}"/>
+                <Entry Placeholder="Medical License Number"
+                       Text="{Binding MedicalId}"
+                       PlaceholderColor="{StaticResource Gray400}"/>
             </VerticalStackLayout>
 
-            <VerticalStackLayout IsVisible="{Binding IsPatient}" Spacing="15">
-                <Label Text="Choose your Doctor:" FontAttributes="Bold" />
-                <Picker Title="-- Select Doctor --" 
-            ItemsSource="{Binding AvailableDoctors}" 
-            ItemDisplayBinding="{Binding FullName}"
-            SelectedItem="{Binding SelectedDoctor}" />
+            <!-- Campuri Pacient -->
+            <VerticalStackLayout IsVisible="{Binding IsPatient}" Spacing="12">
 
-                <Entry Placeholder="Age" Text="{Binding Age}" Keyboard="Numeric" />
+                <Entry Placeholder="Age"
+                       Text="{Binding Age}"
+                       Keyboard="Numeric"
+                       PlaceholderColor="{StaticResource Gray400}"/>
+
+                <!-- Multi-select doctori cu checkboxuri -->
+                <Label Text="Choose your Doctor(s):"
+                       FontAttributes="Bold"
+                       Margin="0,5,0,0"/>
+
+                <Label Text="You can select more than one doctor."
+                       FontSize="12"
+                       TextColor="{StaticResource Gray500}"/>
+
+                <CollectionView ItemsSource="{Binding AvailableDoctors}">
+                    <CollectionView.EmptyView>
+                        <Label Text="No doctors registered yet."
+                               TextColor="Gray" FontSize="13" Margin="5,0"/>
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="viewmodel:DoctorSelectionItem">
+                            <Grid ColumnDefinitions="Auto, *"
+                                  ColumnSpacing="10"
+                                  Padding="5,6">
+                                <CheckBox Grid.Column="0"
+                                          IsChecked="{Binding IsSelected}"
+                                          Color="{StaticResource Primary}"
+                                          VerticalOptions="Center"/>
+                                <VerticalStackLayout Grid.Column="1"
+                                                     VerticalOptions="Center"
+                                                     Spacing="1">
+                                    <Label Text="{Binding Doctor.FullName}"
+                                           FontAttributes="Bold"
+                                           FontSize="15"/>
+                                    <Label Text="{Binding Doctor.Specialization}"
+                                           FontSize="12"
+                                           TextColor="{StaticResource Gray500}"/>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
             </VerticalStackLayout>
 
-            <Button Text="REGISTER" 
-                    Command="{Binding RegisterUserCommand}" 
+            <!-- Butoane -->
+            <Button Text="REGISTER"
+                    Command="{Binding RegisterUserCommand}"
                     BackgroundColor="{StaticResource Primary}"
                     TextColor="White"
                     FontAttributes="Bold"
                     CornerRadius="25"
                     HeightRequest="50"
-                    Margin="0,20,0,0" />
+                    Margin="0,20,0,0"/>
 
             <Button Text="Already have an account? Log In"
                     Command="{Binding GoToLoginCommand}"
                     BackgroundColor="Transparent"
                     TextColor="{StaticResource Primary}"
-                    FontSize="12" />
+                    FontSize="12"/>
 
         </VerticalStackLayout>
     </ScrollView>

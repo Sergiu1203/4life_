@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodel="clr-namespace:_4Life.ViewModels"
@@ -7,72 +7,121 @@
              x:DataType="viewmodel:DoctorDashboardViewModel"
              Title="Doctor Portal">
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Logout" 
-                 Command="{Binding LogoutCommand}" />
+        <ToolbarItem Text="Logout" Command="{Binding LogoutCommand}"/>
     </ContentPage.ToolbarItems>
 
-    <Grid RowDefinitions="Auto, *" Padding="20">
+    <Grid RowDefinitions="Auto, Auto, *" Padding="20" RowSpacing="10">
 
-        <Label Grid.Row="0" Text="My Patients" 
-               FontSize="26" FontAttributes="Bold" 
-               Margin="0,0,0,15" />
+        <Label Grid.Row="0" Text="My Patients"
+               FontSize="26" FontAttributes="Bold" Margin="0,0,0,5"/>
 
-        <CollectionView Grid.Row="1" ItemsSource="{Binding MyPatients}">
+        <SearchBar Grid.Row="1"
+                   Placeholder="Search patients by name..."
+                   Text="{Binding SearchQuery}"
+                   BackgroundColor="{StaticResource Gray100}"/>
+
+        <CollectionView Grid.Row="2" ItemsSource="{Binding MyPatients}">
+            <CollectionView.EmptyView>
+                <Label Text="No patients found." HorizontalOptions="Center"
+                       TextColor="Gray" Margin="20"/>
+            </CollectionView.EmptyView>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:Patient">
-                    <Frame Margin="0,5" Padding="15" HasShadow="True">
-                        <Grid ColumnDefinitions="*, Auto">
-							<VerticalStackLayout Spacing="10">
-								<Label Text="{Binding FullName}" FontSize="20" FontAttributes="Bold" />
+                    <Frame Margin="0,5" Padding="15" HasShadow="True" CornerRadius="12">
+                        <VerticalStackLayout Spacing="10">
 
-								<CollectionView ItemsSource="{Binding PrescribedMedicines}" Margin="10,0">
-									<CollectionView.ItemTemplate>
-										<DataTemplate x:DataType="models:Medicine">
-											<Grid ColumnDefinitions="*, Auto, Auto" Padding="5">
-												<VerticalStackLayout Grid.Column="0">
-													<Label Text="{Binding Name}" FontAttributes="Bold" />
-													<Label Text="{Binding TimeOfDay, StringFormat='Time: {0}'}" FontSize="12" />
-												</VerticalStackLayout>
+                            <!-- Header: Nume + butoane -->
+                            <Grid ColumnDefinitions="*, Auto, Auto, Auto" ColumnSpacing="6">
+                                <Label Grid.Column="0"
+                                       Text="{Binding FullName}"
+                                       FontSize="17" FontAttributes="Bold"
+                                       VerticalOptions="Center"/>
 
-												<Label Grid.Column="1"
-													   Text="{Binding StockQuantity, StringFormat='Stock: {0}'}"
-													   VerticalOptions="Center" Margin="10,0"
-													   TextColor="{StaticResource Primary}"/>
+                                <!-- Journal -->
+                                <Button Grid.Column="1" Text="📋" FontSize="17"
+                                        BackgroundColor="#5C6BC0" TextColor="White"
+                                        CornerRadius="20" HeightRequest="40" WidthRequest="46"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:DoctorDashboardViewModel}}, Path=ViewPatientJournalCommand}"
+                                        CommandParameter="{Binding .}"/>
 
-												<Button Grid.Column="1"
+                                <!-- Chat -->
+                                <Button Grid.Column="2" Text="💬" FontSize="17"
+                                        BackgroundColor="{StaticResource Primary}" TextColor="White"
+                                        CornerRadius="20" HeightRequest="40" WidthRequest="46"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:DoctorDashboardViewModel}}, Path=OpenChatCommand}"
+                                        CommandParameter="{Binding .}"/>
+
+                                <!-- Delete -->
+                                <Button Grid.Column="3" Text="🗑" FontSize="17"
+                                        BackgroundColor="Red" TextColor="White"
+                                        CornerRadius="20" HeightRequest="40" WidthRequest="46"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:DoctorDashboardViewModel}}, Path=DeletePatientCommand}"
+                                        CommandParameter="{Binding .}"/>
+                            </Grid>
+
+                            <!-- Lista medicamente -->
+                            <CollectionView ItemsSource="{Binding PrescribedMedicines}" Margin="5,0">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:Medicine">
+                                        <Frame Margin="0,3" Padding="10,8"
+                                               CornerRadius="8" HasShadow="False"
+                                               BackgroundColor="{Binding IsPatientAdded, Converter={StaticResource BoolToColorConverter}}"
+                                               BorderColor="{StaticResource Gray200}">
+                                            <Grid ColumnDefinitions="*, Auto, Auto" ColumnSpacing="6">
+
+                                                <VerticalStackLayout Grid.Column="0" Spacing="2">
+
+                                                    <!-- Linia 1: Nume + badge "Added by patient" -->
+                                                    <HorizontalStackLayout Spacing="6">
+                                                        <Label Text="{Binding Name}"
+                                                               FontAttributes="Bold" FontSize="14"
+                                                               VerticalOptions="Center"/>
+
+                                                        <!-- Badge vizibil doar pt medicamentele adaugate de pacient -->
+                                                        <Frame IsVisible="{Binding IsPatientAdded}"
+                                                               Padding="6,2"
+                                                               BackgroundColor="#7B52AB"
+                                                               BorderColor="Transparent"
+                                                               CornerRadius="6">
+                                                            <Label Text="🧴 Patient's own"
+                                                                   FontSize="10"
+                                                                   FontAttributes="Bold"
+                                                                   TextColor="White"/>
+                                                        </Frame>
+                                                    </HorizontalStackLayout>
+
+                                                    <Label Text="{Binding DisplayTimes, StringFormat='⏰ {0}'}"
+                                                           FontSize="11"
+                                                           TextColor="{StaticResource Secondary}"/>
+                                                </VerticalStackLayout>
+
+                                                <!-- Edit — ascuns pt medicamentele adaugate de pacient -->
+                                                <Button Grid.Column="1"
                                                         Text="Edit"
                                                         BackgroundColor="Orange"
+                                                        IsVisible="{Binding IsPatientAdded, Converter={StaticResource InverseBoolConverter}}"
                                                         Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:DoctorDashboardViewModel}}, Path=GoToEditPrescriptionCommand}"
                                                         CommandParameter="{Binding .}"
-                                                        HeightRequest="35"
-                                                        FontSize="10" />
+                                                        HeightRequest="34" FontSize="10"/>
 
-												<Button Grid.Column="2"
-														Text="Remove"
-														BackgroundColor="Red"
-														TextColor="White"
-														FontSize="10"
-														Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:DoctorDashboardViewModel}}, Path=DeleteMedicineCommand}"
-														CommandParameter="{Binding .}" />
-											</Grid>
-										</DataTemplate>
-									</CollectionView.ItemTemplate>
-								</CollectionView>
+                                                <Button Grid.Column="2"
+                                                        Text="Remove"
+                                                        BackgroundColor="Red" TextColor="White"
+                                                        FontSize="10"
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:DoctorDashboardViewModel}}, Path=DeleteMedicineCommand}"
+                                                        CommandParameter="{Binding .}"/>
+                                            </Grid>
+                                        </Frame>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
 
-								<Button Text="Add Prescription"
-										Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:DoctorDashboardViewModel}}, Path=GoToPrescribeCommand}"
-										CommandParameter="{Binding .}"
-										BackgroundColor="{StaticResource Secondary}"
-                                        TextColor="White"/>
-							</VerticalStackLayout>
-
-                            <!--Button Grid.Column="1" 
-                                    Text="Prescribe" 
+                            <Button Text="+ Add Prescription"
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:DoctorDashboardViewModel}}, Path=GoToPrescribeCommand}"
                                     CommandParameter="{Binding .}"
                                     BackgroundColor="{StaticResource Secondary}"
-                                    TextColor="White" /> -->
-                        </Grid>
+                                    TextColor="White"/>
+                        </VerticalStackLayout>
                     </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>

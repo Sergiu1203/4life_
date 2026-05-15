@@ -3,12 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodel="clr-namespace:_4Life.ViewModels"
              xmlns:data="clr-namespace:_4Life.Data"
-             x:Class="_4Life.Views.PrescribePage"
-             x:DataType="viewmodel:PrescribeViewModel"
-             Title="{Binding PageTitle}"
+             x:Class="_4Life.Views.AddOwnMedicinePage"
+             x:DataType="viewmodel:AddOwnMedicineViewModel"
+             Title="Add My Medicine"
              BackgroundColor="White">
 
-    <!-- TapGestureRecognizer pe intreaga pagina pentru a inchide dropdown -->
     <!-- NOU — inlocuieste ScrollView-ul existent -->
     <Grid>
         <Grid.GestureRecognizers>
@@ -18,21 +17,22 @@
         <ScrollView>
             <VerticalStackLayout Spacing="18" Padding="25">
 
-                <Label Text="Prescribe Medication"
+                <Label Text="Add Your Own Medicine"
                FontSize="22" FontAttributes="Bold"
                TextColor="{StaticResource Primary}"/>
+
+                <Label Text="For over-the-counter medicines or supplements."
+               FontSize="13" TextColor="Gray"/>
 
                 <!-- ===== CAMP CAUTARE CU AUTOFILL ===== -->
                 <Label Text="Medicine name:" FontAttributes="Bold" TextColor="Gray"/>
 
-                <!-- Wrapper relativ pentru a suprapune dropdown-ul -->
                 <VerticalStackLayout Spacing="0">
 
-                    <Entry Placeholder="Type to search (e.g. Aspirin, Vitamin C…)"
+                    <Entry Placeholder="Type to search (e.g. Vitamin C, Ibuprofen…)"
                    Text="{Binding MedName}"
                    ReturnType="Next"/>
 
-                    <!-- Dropdown suggestions — apare sub Entry -->
                     <Frame IsVisible="{Binding ShowSuggestions}"
                    Padding="0"
                    BorderColor="{StaticResource Gray200}"
@@ -48,7 +48,7 @@
                                   BackgroundColor="White">
                                         <Grid.GestureRecognizers>
                                             <TapGestureRecognizer
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:PrescribeViewModel}}, Path=SelectSuggestionCommand}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:AddOwnMedicineViewModel}}, Path=SelectSuggestionCommand}"
                                         CommandParameter="{Binding .}"/>
                                         </Grid.GestureRecognizers>
 
@@ -71,17 +71,15 @@
                     </Frame>
                 </VerticalStackLayout>
 
-                <!-- ===== DOZA ===== -->
                 <Entry Placeholder="Dosage (e.g., 500mg) — auto-filled from list"
                Text="{Binding Dosage}"/>
 
-                <!-- ===== STOC ===== -->
-                <Entry Placeholder="Initial stock quantity"
+                <Entry Placeholder="Quantity in stock"
                Text="{Binding InitialStock}"
                Keyboard="Numeric"/>
 
                 <!-- ===== ORE DE ADMINISTRARE ===== -->
-                <Label Text="Schedule for:" FontAttributes="Bold" TextColor="Gray"/>
+                <Label Text="When do you take it?" FontAttributes="Bold" TextColor="Gray"/>
 
                 <Frame Padding="15,10" BorderColor="{StaticResource Gray200}"
                CornerRadius="10" HasShadow="False">
@@ -115,11 +113,16 @@
                TextColor="Red" FontSize="12"
                IsVisible="{Binding TimesError, Converter={StaticResource StringToBoolConverter}}"/>
 
-                <Button Text="SAVE PRESCRIPTION"
-                Command="{Binding SavePrescriptionCommand}"
+                <Button Text="ADD MEDICINE"
+                Command="{Binding SaveCommand}"
                 BackgroundColor="{StaticResource Primary}"
-                TextColor="White" HeightRequest="50"
-                CornerRadius="25" Margin="0,10,0,0"/>
+                TextColor="White" CornerRadius="25"
+                HeightRequest="50" Margin="0,10,0,0"/>
+
+                <Button Text="Cancel"
+                Command="{Binding CancelCommand}"
+                BackgroundColor="Transparent"
+                TextColor="Gray" FontSize="13"/>
 
             </VerticalStackLayout>
         </ScrollView>
@@ -127,4 +130,3 @@
 
     
 </ContentPage>
-
