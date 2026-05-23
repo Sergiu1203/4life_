@@ -24,20 +24,17 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:Patient">
                         <Frame Margin="0,5" Padding="15" CornerRadius="10">
-                            <HorizontalStackLayout Spacing="15">
+                            <HorizontalStackLayout Spacing="12">
                                 <VerticalStackLayout WidthRequest="200">
                                     <Label Text="{Binding FullName}"
                                            FontAttributes="Bold" FontSize="16"/>
                                     <Label Text="{Binding Age, StringFormat='Age: {0}'}"
                                            TextColor="Gray" FontSize="12"/>
                                 </VerticalStackLayout>
-
                                 <Button Text="Edit"
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:AdminDashboardViewModel}}, Path=EditPatientCommand}"
                                         CommandParameter="{Binding .}"/>
-
-                                <Button Text="Delete"
-                                        BackgroundColor="Red" TextColor="White"
+                                <Button Text="Delete" BackgroundColor="Red" TextColor="White"
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:AdminDashboardViewModel}}, Path=DeletePatientCommand}"
                                         CommandParameter="{Binding .}"/>
                             </HorizontalStackLayout>
@@ -56,8 +53,8 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:Doctor">
                         <Frame Margin="0,5" Padding="15" CornerRadius="10">
-                            <HorizontalStackLayout Spacing="15">
-                                <VerticalStackLayout WidthRequest="200">
+                            <HorizontalStackLayout Spacing="12">
+                                <VerticalStackLayout WidthRequest="180">
                                     <Label Text="{Binding FullName}"
                                            FontAttributes="Bold" FontSize="16"/>
                                     <Label Text="{Binding Specialization}"
@@ -65,6 +62,12 @@
                                     <Label Text="{Binding MedicalId, StringFormat='ID: {0}'}"
                                            TextColor="Gray" FontSize="11"/>
                                 </VerticalStackLayout>
+
+                                <!-- Buton Edit — nou -->
+                                <Button Text="Edit"
+                                        BackgroundColor="Orange" TextColor="White"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:AdminDashboardViewModel}}, Path=EditDoctorCommand}"
+                                        CommandParameter="{Binding .}"/>
 
                                 <Button Text="Delete"
                                         BackgroundColor="Red" TextColor="White"

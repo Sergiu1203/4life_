@@ -19,9 +19,10 @@ namespace _4Life.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            // IMPORTANT: schimba numele bazei de date la fiecare migratie manuala
-            string dbPath = Path.Combine(FileSystem.AppDataDirectory, "4life_database_13.db3");
-            optionsBuilder.UseSqlite($"Filename={dbPath}");
+
+                string dbPath = Path.Combine(FileSystem.AppDataDirectory, "4life_database_15.db3");
+                optionsBuilder.UseSqlite($"Filename={dbPath}");
+
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

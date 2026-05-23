@@ -8,8 +8,6 @@
              Title="{Binding PageTitle}"
              BackgroundColor="White">
 
-    <!-- TapGestureRecognizer pe intreaga pagina pentru a inchide dropdown -->
-    <!-- NOU — inlocuieste ScrollView-ul existent -->
     <Grid>
         <Grid.GestureRecognizers>
             <TapGestureRecognizer Command="{Binding DismissSuggestionsCommand}"/>
@@ -19,51 +17,36 @@
             <VerticalStackLayout Spacing="18" Padding="25">
 
                 <Label Text="Prescribe Medication"
-               FontSize="22" FontAttributes="Bold"
-               TextColor="{StaticResource Primary}"/>
+                       FontSize="22" FontAttributes="Bold"
+                       TextColor="{StaticResource Primary}"/>
 
-                <!-- ===== CAMP CAUTARE CU AUTOFILL ===== -->
+                <!-- ===== AUTOCOMPLETE MEDICAMENT ===== -->
                 <Label Text="Medicine name:" FontAttributes="Bold" TextColor="Gray"/>
 
-                <!-- Wrapper relativ pentru a suprapune dropdown-ul -->
                 <VerticalStackLayout Spacing="0">
+                    <Entry Placeholder="Type to search (e.g. Aspirin, Ibuprofen…)"
+                           Text="{Binding MedName}" ReturnType="Next"/>
 
-                    <Entry Placeholder="Type to search (e.g. Aspirin, Vitamin C…)"
-                   Text="{Binding MedName}"
-                   ReturnType="Next"/>
-
-                    <!-- Dropdown suggestions — apare sub Entry -->
                     <Frame IsVisible="{Binding ShowSuggestions}"
-                   Padding="0"
-                   BorderColor="{StaticResource Gray200}"
-                   CornerRadius="8"
-                   HasShadow="True"
-                   Margin="0,-2,0,0">
+                           Padding="0" BorderColor="{StaticResource Gray200}"
+                           CornerRadius="8" HasShadow="True" Margin="0,-2,0,0">
                         <CollectionView ItemsSource="{Binding FilteredSuggestions}"
-                                MaximumHeightRequest="220">
+                                        MaximumHeightRequest="220">
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="data:MedicineSuggestion">
-                                    <Grid ColumnDefinitions="*, Auto"
-                                  Padding="14,10"
-                                  BackgroundColor="White">
+                                    <Grid ColumnDefinitions="*, Auto" Padding="14,10" BackgroundColor="White">
                                         <Grid.GestureRecognizers>
                                             <TapGestureRecognizer
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:PrescribeViewModel}}, Path=SelectSuggestionCommand}"
-                                        CommandParameter="{Binding .}"/>
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:PrescribeViewModel}}, Path=SelectSuggestionCommand}"
+                                                CommandParameter="{Binding .}"/>
                                         </Grid.GestureRecognizers>
-
                                         <VerticalStackLayout Grid.Column="0" Spacing="1">
-                                            <Label Text="{Binding Name}"
-                                           FontAttributes="Bold" FontSize="14"/>
-                                            <Label Text="{Binding Category}"
-                                           FontSize="11" TextColor="Gray"/>
+                                            <Label Text="{Binding Name}" FontAttributes="Bold" FontSize="14"/>
+                                            <Label Text="{Binding Category}" FontSize="11" TextColor="Gray"/>
                                         </VerticalStackLayout>
-
-                                        <Label Grid.Column="1"
-                                       Text="{Binding SuggestedDosage}"
-                                       FontSize="12"
-                                       TextColor="{StaticResource Primary}"
-                                       VerticalOptions="Center"/>
+                                        <Label Grid.Column="1" Text="{Binding SuggestedDosage}"
+                                               FontSize="12" TextColor="{StaticResource Primary}"
+                                               VerticalOptions="Center"/>
                                     </Grid>
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
@@ -71,60 +54,102 @@
                     </Frame>
                 </VerticalStackLayout>
 
-                <!-- ===== DOZA ===== -->
-                <Entry Placeholder="Dosage (e.g., 500mg) — auto-filled from list"
-               Text="{Binding Dosage}"/>
-
                 <!-- ===== STOC ===== -->
-                <Entry Placeholder="Initial stock quantity"
-               Text="{Binding InitialStock}"
-               Keyboard="Numeric"/>
+                <Entry Placeholder="Initial stock quantity (number of pills)"
+                       Text="{Binding InitialStock}" Keyboard="Numeric"/>
 
-                <!-- ===== ORE DE ADMINISTRARE ===== -->
-                <Label Text="Schedule for:" FontAttributes="Bold" TextColor="Gray"/>
+                <!-- ===== SCHEDULE + DOZA PER MOMENT ===== -->
+                <Label Text="Schedule &amp; dosage per time:" FontAttributes="Bold" TextColor="Gray"/>
 
-                <Frame Padding="15,10" BorderColor="{StaticResource Gray200}"
-               CornerRadius="10" HasShadow="False">
-                    <VerticalStackLayout Spacing="12">
+                <Label Text="Select the times and enter how many pills for each."
+                       FontSize="12" TextColor="Gray" Margin="0,-8,0,0"/>
 
-                        <Grid ColumnDefinitions="Auto, Auto, *" ColumnSpacing="10">
+                <Frame Padding="15,12" BorderColor="{StaticResource Gray200}"
+                       CornerRadius="12" HasShadow="False">
+                    <VerticalStackLayout Spacing="14">
+
+                        <!-- MORNING -->
+                        <Grid ColumnDefinitions="Auto, Auto, *, Auto, Auto" ColumnSpacing="10">
                             <CheckBox Grid.Column="0" IsChecked="{Binding TakeMorning}"
-                              Color="{StaticResource Primary}" VerticalOptions="Center"/>
-                            <Label Grid.Column="1" Text="🌅" FontSize="20" VerticalOptions="Center"/>
-                            <Label Grid.Column="2" Text="Morning" FontSize="16" VerticalOptions="Center"/>
+                                      Color="{StaticResource Primary}" VerticalOptions="Center"/>
+                            <Label Grid.Column="1" Text="🌅" FontSize="22" VerticalOptions="Center"/>
+                            <Label Grid.Column="2" Text="Morning" FontSize="15" VerticalOptions="Center"/>
+                            <!-- Camp doza — vizibil doar daca e bifat -->
+                            <Entry Grid.Column="3"
+                                   IsVisible="{Binding TakeMorning}"
+                                   Text="{Binding MorningDose}"
+                                   Placeholder="pills"
+                                   Keyboard="Numeric"
+                                   WidthRequest="70"
+                                   HorizontalTextAlignment="Center"
+                                   VerticalOptions="Center"/>
+                            <Label Grid.Column="4"
+                                   IsVisible="{Binding TakeMorning}"
+                                   Text="pill(s)"
+                                   FontSize="12" TextColor="Gray"
+                                   VerticalOptions="Center"/>
                         </Grid>
 
-                        <Grid ColumnDefinitions="Auto, Auto, *" ColumnSpacing="10">
+                        <BoxView HeightRequest="0.5" Color="{StaticResource Gray200}"/>
+
+                        <!-- LUNCH -->
+                        <Grid ColumnDefinitions="Auto, Auto, *, Auto, Auto" ColumnSpacing="10">
                             <CheckBox Grid.Column="0" IsChecked="{Binding TakeLunch}"
-                              Color="{StaticResource Primary}" VerticalOptions="Center"/>
-                            <Label Grid.Column="1" Text="☀️" FontSize="20" VerticalOptions="Center"/>
-                            <Label Grid.Column="2" Text="Lunch" FontSize="16" VerticalOptions="Center"/>
+                                      Color="{StaticResource Primary}" VerticalOptions="Center"/>
+                            <Label Grid.Column="1" Text="☀️" FontSize="22" VerticalOptions="Center"/>
+                            <Label Grid.Column="2" Text="Lunch" FontSize="15" VerticalOptions="Center"/>
+                            <Entry Grid.Column="3"
+                                   IsVisible="{Binding TakeLunch}"
+                                   Text="{Binding LunchDose}"
+                                   Placeholder="pills"
+                                   Keyboard="Numeric"
+                                   WidthRequest="70"
+                                   HorizontalTextAlignment="Center"
+                                   VerticalOptions="Center"/>
+                            <Label Grid.Column="4"
+                                   IsVisible="{Binding TakeLunch}"
+                                   Text="pill(s)"
+                                   FontSize="12" TextColor="Gray"
+                                   VerticalOptions="Center"/>
                         </Grid>
 
-                        <Grid ColumnDefinitions="Auto, Auto, *" ColumnSpacing="10">
+                        <BoxView HeightRequest="0.5" Color="{StaticResource Gray200}"/>
+
+                        <!-- DINNER -->
+                        <Grid ColumnDefinitions="Auto, Auto, *, Auto, Auto" ColumnSpacing="10">
                             <CheckBox Grid.Column="0" IsChecked="{Binding TakeDinner}"
-                              Color="{StaticResource Primary}" VerticalOptions="Center"/>
-                            <Label Grid.Column="1" Text="🌙" FontSize="20" VerticalOptions="Center"/>
-                            <Label Grid.Column="2" Text="Dinner" FontSize="16" VerticalOptions="Center"/>
+                                      Color="{StaticResource Primary}" VerticalOptions="Center"/>
+                            <Label Grid.Column="1" Text="🌙" FontSize="22" VerticalOptions="Center"/>
+                            <Label Grid.Column="2" Text="Dinner" FontSize="15" VerticalOptions="Center"/>
+                            <Entry Grid.Column="3"
+                                   IsVisible="{Binding TakeDinner}"
+                                   Text="{Binding DinnerDose}"
+                                   Placeholder="pills"
+                                   Keyboard="Numeric"
+                                   WidthRequest="70"
+                                   HorizontalTextAlignment="Center"
+                                   VerticalOptions="Center"/>
+                            <Label Grid.Column="4"
+                                   IsVisible="{Binding TakeDinner}"
+                                   Text="pill(s)"
+                                   FontSize="12" TextColor="Gray"
+                                   VerticalOptions="Center"/>
                         </Grid>
 
                     </VerticalStackLayout>
                 </Frame>
 
                 <Label Text="{Binding TimesError}"
-               TextColor="Red" FontSize="12"
-               IsVisible="{Binding TimesError, Converter={StaticResource StringToBoolConverter}}"/>
+                       TextColor="Red" FontSize="12"
+                       IsVisible="{Binding TimesError, Converter={StaticResource StringToBoolConverter}}"/>
 
                 <Button Text="SAVE PRESCRIPTION"
-                Command="{Binding SavePrescriptionCommand}"
-                BackgroundColor="{StaticResource Primary}"
-                TextColor="White" HeightRequest="50"
-                CornerRadius="25" Margin="0,10,0,0"/>
+                        Command="{Binding SavePrescriptionCommand}"
+                        BackgroundColor="{StaticResource Primary}"
+                        TextColor="White" HeightRequest="50"
+                        CornerRadius="25" Margin="0,10,0,0"/>
 
             </VerticalStackLayout>
         </ScrollView>
     </Grid>
-
-    
 </ContentPage>
-
