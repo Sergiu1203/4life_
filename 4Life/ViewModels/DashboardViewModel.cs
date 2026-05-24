@@ -16,27 +16,19 @@ namespace _4Life.ViewModels
         private List<Medicine> _allMeds = new();
 
         [ObservableProperty] private string userName;
-        [ObservableProperty] private string searchQuery    = string.Empty;
+        [ObservableProperty] private string searchQuery      = string.Empty;
         [ObservableProperty] private int    unreadCount;
         [ObservableProperty] private bool   hasUnread;
-
-        // Panoul cu doctori — inchis implicit, se deschide la tap
-        [ObservableProperty] private bool   doctorPanelOpen = false;
+        [ObservableProperty] private bool   doctorPanelOpen  = false;
         [ObservableProperty] private string doctorPanelArrow = "▲";
 
-        partial void OnDoctorPanelOpenChanged(bool value)
-            => DoctorPanelArrow = value ? "▼" : "▲";
-
-        [RelayCommand]
-        void ToggleDoctorPanel() => DoctorPanelOpen = !DoctorPanelOpen;
+        partial void OnDoctorPanelOpenChanged(bool value) => DoctorPanelArrow = value ? "▼" : "▲";
+        [RelayCommand] void ToggleDoctorPanel() => DoctorPanelOpen = !DoctorPanelOpen;
 
         public ObservableCollection<MedicineEntry> DailyMeds { get; set; } = new();
         public ObservableCollection<Doctor> MyDoctors { get; set; } = new();
 
-        public DashboardViewModel(AppDbContext context)
-        {
-            _context = context;
-        }
+        public DashboardViewModel(AppDbContext context) { _context = context; }
 
         // ---------------------------------------------------------------
         // INCARCARE DATE
@@ -44,24 +36,20 @@ namespace _4Life.ViewModels
         public async Task LoadPatientData(int userId)
         {
             var patient = await _context.Patients
-                .Include(p => p.PatientDoctors)
-                    .ThenInclude(pd => pd.Doctor)
+                .Include(p => p.PatientDoctors).ThenInclude(pd => pd.Doctor)
                 .FirstOrDefaultAsync(p => p.UserId == userId);
-
             if (patient == null) return;
 
             _currentPatientId = patient.Id;
             _currentDoctorId  = patient.DoctorId ?? 0;
 
-            _allMeds = await _context.Medicines
-                .Where(m => m.PatientId == patient.Id)
-                .ToListAsync();
+            _allMeds = await _context.Medicines.Where(m => m.PatientId == patient.Id).ToListAsync();
 
             var doctors = patient.PatientDoctors.Select(pd => pd.Doctor).ToList();
             if (!doctors.Any() && patient.DoctorId.HasValue)
             {
-                var mainDoc = await _context.Doctors.FindAsync(patient.DoctorId.Value);
-                if (mainDoc != null) doctors.Add(mainDoc);
+                var d = await _context.Doctors.FindAsync(patient.DoctorId.Value);
+                if (d != null) doctors.Add(d);
             }
 
             MainThread.BeginInvokeOnMainThread(() =>
@@ -97,11 +85,19 @@ namespace _4Life.ViewModels
                     {
                         Source   = med,
                         Name     = med.Name,
-                        Dosage   = med.Dosage,
                         MealTime = time,
                         IsOtc    = med.PrescribedByDoctorId == null
                     };
-                    entry.IsTaken = Preferences.Default.Get(entry.PreferenceKey, false);
+
+                    // Restaureaza starea din Preferences (UI local)
+                    // DAR validam si fata de starea din DB (per moment)
+                    bool prefState = Preferences.Default.Get(entry.PreferenceKey, false);
+                    bool dbState   = med.GetIsTakenForTime(time);
+
+                    // Folosim starea DB ca sursa de adevar — Preferences e doar cache UI
+                    entry.IsTaken = dbState;
+                    Preferences.Default.Set(entry.PreferenceKey, dbState);
+
                     entries.Add(entry);
                 }
             }
@@ -115,80 +111,94 @@ namespace _4Life.ViewModels
 
         private void ApplySearch()
         {
-            var query = SearchQuery?.Trim().ToLower() ?? string.Empty;
-            var filtered = string.IsNullOrEmpty(query)
+            var q = SearchQuery?.Trim().ToLower() ?? string.Empty;
+            var filtered = string.IsNullOrEmpty(q)
                 ? _allMeds
                 : _allMeds.Where(m =>
-                    m.Name.ToLower().Contains(query) ||
-                    (m.Category?.ToLower().Contains(query) ?? false) ||
-                    (m.Dosage?.ToLower().Contains(query) ?? false)).ToList();
+                    m.Name.ToLower().Contains(q) ||
+                    (m.Category?.ToLower().Contains(q) ?? false)).ToList();
 
             DailyMeds.Clear();
             foreach (var e in ExpandToEntries(filtered)) DailyMeds.Add(e);
         }
 
         // ---------------------------------------------------------------
-        // TOGGLE MEDICATION
+        // TOGGLE MEDICATION — decrement corect per moment al zilei
+        //
+        // Logica:
+        // - Fiecare MedicineEntry are MealTime propriu ("Morning", "Lunch" etc.)
+        // - Medicine are MorningTaken / LunchTaken / DinnerTaken in DB (independent)
+        // - Comparăm entry.IsTaken cu dbMed.GetIsTakenForTime(entry.MealTime)
+        //   => detectam daca e o schimbare reala sau o restaurare la incarcare
+        // - Stock se decrementeaza cu entry.Dose (doza specifica momentului)
         // ---------------------------------------------------------------
         [RelayCommand]
         public async Task ToggleMedicationTaken(MedicineEntry entry)
         {
             if (entry == null) return;
 
-            var dbMed = await _context.Medicines
-                .AsNoTracking()
+            // Citim starea curenta din DB
+            var dbMed = await _context.Medicines.AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == entry.Source.Id);
-
             if (dbMed == null) return;
 
-            var prefKey = entry.PreferenceKey;
+            // Starea per moment din DB pentru acest MealTime
+            bool dbTakenForThisTime = dbMed.GetIsTakenForTime(entry.MealTime);
 
-            if (entry.IsTaken == dbMed.IsTaken)
+            // Daca starea UI == starea DB pentru ACEST moment => restaurare, nu actiune
+            if (entry.IsTaken == dbTakenForThisTime)
             {
-                Preferences.Default.Set(prefKey, entry.IsTaken);
+                Preferences.Default.Set(entry.PreferenceKey, entry.IsTaken);
                 return;
             }
 
-            Preferences.Default.Set(prefKey, entry.IsTaken);
-
-            int amountTaken = 1;
-            var match = System.Text.RegularExpressions.Regex.Match(entry.Source.Dosage ?? "", @"\d+");
-            if (match.Success) amountTaken = int.Parse(match.Value);
-
+            // Doza pentru acest moment
+            int dose     = entry.Dose;
             int newStock = dbMed.StockQuantity;
 
             if (entry.IsTaken)
             {
-                if (newStock >= amountTaken)
+                // Pacientul tocmai a bifat — decrementeaza cu doza acestui moment
+                if (newStock >= dose)
                 {
-                    newStock -= amountTaken;
+                    newStock -= dose;
                     if (newStock < 5)
                         await Shell.Current.DisplayAlert("⚠️ Low Stock",
                             $"{entry.Name} has only {newStock} units left!", "OK");
                 }
                 else
                 {
-                    await Shell.Current.DisplayAlert("Out of Stock", "Not enough medicine left!", "OK");
+                    await Shell.Current.DisplayAlert("Out of Stock",
+                        $"Not enough {entry.Name}! Only {newStock} left.", "OK");
                     entry.IsTaken = false;
-                    Preferences.Default.Set(prefKey, false);
+                    Preferences.Default.Set(entry.PreferenceKey, false);
                     return;
                 }
             }
             else
             {
-                newStock += amountTaken;
+                // Pacientul a debifat — restaureaza doza acestui moment
+                newStock += dose;
             }
 
-            var trackedMed = await _context.Medicines.FindAsync(entry.Source.Id);
-            if (trackedMed != null)
+            // Salveaza in DB: stocul nou + IsTaken per moment
+            var tracked = await _context.Medicines.FindAsync(entry.Source.Id);
+            if (tracked != null)
             {
-                trackedMed.StockQuantity   = newStock;
-                trackedMed.IsTaken         = entry.IsTaken;
+                tracked.StockQuantity = newStock;
+                tracked.SetIsTakenForTime(entry.MealTime, entry.IsTaken);
+
+                // Actualizam si Source (obiectul in memorie) pentru UI refresh imediat
                 entry.Source.StockQuantity = newStock;
-                entry.Source.IsTaken       = entry.IsTaken;
+                entry.Source.SetIsTakenForTime(entry.MealTime, entry.IsTaken);
+
                 await _context.SaveChangesAsync();
             }
 
+            // Salveaza starea in Preferences
+            Preferences.Default.Set(entry.PreferenceKey, entry.IsTaken);
+
+            // Notifica toate intrarile din acelasi medicament sa-si actualizeze stocul
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 foreach (var e in DailyMeds.Where(e => e.Source.Id == entry.Source.Id))
@@ -203,7 +213,6 @@ namespace _4Life.ViewModels
         public async Task DeleteOwnMedicine(MedicineEntry entry)
         {
             if (entry == null || !entry.IsOtc) return;
-
             bool confirm = await Shell.Current.DisplayAlert("Remove",
                 $"Remove {entry.Name} from your schedule?", "Yes", "Cancel");
             if (!confirm) return;
@@ -298,14 +307,12 @@ namespace _4Life.ViewModels
                 PhoneDialer.Default.Open("112");
         }
 
-        [RelayCommand]
-        async Task GoToJournal() => await Shell.Current.GoToAsync("SymptomJournalPage");
+        [RelayCommand] async Task GoToJournal() => await Shell.Current.GoToAsync("SymptomJournalPage");
 
         [RelayCommand]
         async Task Logout()
         {
-            bool answer = await Shell.Current.DisplayAlert("Logout",
-                "Are you sure you want to logout?", "Yes", "No");
+            bool answer = await Shell.Current.DisplayAlert("Logout", "Are you sure?", "Yes", "No");
             if (answer) { Preferences.Default.Remove("CurrentUserId"); await Shell.Current.GoToAsync("//LoginPage"); }
         }
     }

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:_4Life.ViewModels"
+             x:Class="_4Life.Views.AdminEditDoctorPage"
+             x:DataType="viewmodel:AdminEditDoctorViewModel"
+             Title="Edit Doctor"
+             BackgroundColor="White">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="30" Spacing="18">
+
+            <Label Text="Edit Doctor Profile"
+                   FontSize="22" FontAttributes="Bold"
+                   TextColor="{StaticResource Primary}"
+                   HorizontalOptions="Center"/>
+
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Full Name" FontAttributes="Bold"/>
+                <Entry Text="{Binding FullName}" Placeholder="Enter full name"/>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Specialization" FontAttributes="Bold"/>
+                <Entry Text="{Binding Specialization}" Placeholder="e.g. Cardiology"/>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Medical License ID" FontAttributes="Bold"/>
+                <Entry Text="{Binding MedicalId}" Placeholder="License number"/>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="5">
+                <Label Text="Email Address" FontAttributes="Bold"/>
+                <Entry Text="{Binding Email}" Placeholder="Email" Keyboard="Email"/>
+            </VerticalStackLayout>
+
+            <Button Text="SAVE CHANGES"
+                    Command="{Binding SaveCommand}"
+                    BackgroundColor="{StaticResource Primary}"
+                    TextColor="White"
+                    HeightRequest="50"
+                    CornerRadius="25"
+                    Margin="0,15,0,0"/>
+
+            <Button Text="Cancel"
+                    Command="{Binding CancelCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="Gray"
+                    FontSize="13"
+                    HorizontalOptions="Center"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
