@@ -58,6 +58,7 @@ namespace _4Life.Tests
         public int StockQuantity { get; set; }
         public bool IsTaken { get; set; }
     }
+
     public class ChatMessage
     {
         [Key] public int Id { get; set; }
@@ -79,6 +80,7 @@ namespace _4Life.Tests
         public int DoctorId { get; set; }
         public Doctor Doctor { get; set; } = null!;
     }
+
     public static class MedicineDatabase
     {
         public static List<MedicineSuggestion> All { get; } = new()
@@ -110,7 +112,7 @@ namespace _4Life.Tests
     }
 
     // ============================================================
-    // DB CONTEXT (InMemory — fara SQLite, fara FileSystem MAUI)
+    // DB CONTEXT (InMemory)
     // ============================================================
     public class TestDbContext : DbContext
     {
@@ -170,9 +172,6 @@ namespace _4Life.Tests
         }
     }
 
-    // ============================================================
-    // TESTE TC01 – TC16
-    // ============================================================
     public class FourLifeTests
     {
         private TestDbContext CreateContext() =>
@@ -558,12 +557,12 @@ namespace _4Life.Tests
             Assert.Null(await ctx.Users.FindAsync(userId));
             Assert.Null(await ctx.Patients.FindAsync(patientId));
         }
-    
-    // ================================================================
-        // PASSWORD RESET — Verify email exists
+
+        // ================================================================
+        // TC17 — Forgot password: existing email returns user
         // ================================================================
         [Fact]
-        public async Task ForgotPassword_ExistingEmail_ReturnsUser()
+        public async Task TC17_ForgotPassword_ExistingEmail_ReturnsUser()
         {
             using var ctx = CreateContext();
             ctx.Users.Add(new User { Email = "exist@test.com", Password = "Pass1!", Role = "Patient" });
@@ -573,8 +572,9 @@ namespace _4Life.Tests
             Assert.NotNull(user);
         }
 
+        // TC18 — Forgot password: non-existing email returns null
         [Fact]
-        public async Task ForgotPassword_NonExistingEmail_ReturnsNull()
+        public async Task TC18_ForgotPassword_NonExistingEmail_ReturnsNull()
         {
             using var ctx = CreateContext();
 
@@ -582,11 +582,9 @@ namespace _4Life.Tests
             Assert.Null(user);
         }
 
-        // ================================================================
-        // PASSWORD RESET — Reset password saves new value
-        // ================================================================
+        // TC19 — Forgot password: reset password saves new value
         [Fact]
-        public async Task ForgotPassword_ResetPassword_UpdatesCorrectly()
+        public async Task TC19_ForgotPassword_ResetPassword_UpdatesCorrectly()
         {
             using var ctx = CreateContext();
             ctx.Users.Add(new User { Email = "reset@test.com", Password = "OldPass1!", Role = "Patient" });
@@ -601,8 +599,9 @@ namespace _4Life.Tests
             Assert.Equal("NewPass1!", updated!.Password);
         }
 
+        // TC20 — Forgot password: mismatched passwords fail validation
         [Fact]
-        public void ForgotPassword_MismatchedPasswords_FailsValidation()
+        public void TC20_ForgotPassword_MismatchedPasswords_FailsValidation()
         {
             string newPassword = "NewPass1!";
             string confirmPassword = "Different1!";
@@ -611,15 +610,13 @@ namespace _4Life.Tests
             Assert.False(match);
         }
 
-        // ================================================================
-        // DAILY CHECK-IN — Score display
-        // ================================================================
+        // TC21–TC24 — Daily check-in: score label is correct
         [Theory]
         [InlineData(1, "Very bad")]
         [InlineData(5, "Okay")]
         [InlineData(7, "Good")]
         [InlineData(10, "Amazing!")]
-        public void DailyCheckIn_ScoreLabel_IsCorrect(int score, string expectedLabel)
+        public void TC21_TC24_DailyCheckIn_ScoreLabel_IsCorrect(int score, string expectedLabel)
         {
             string label = score switch
             {
@@ -638,11 +635,9 @@ namespace _4Life.Tests
             Assert.Equal(expectedLabel, label);
         }
 
-        // ================================================================
-        // DAILY CHECK-IN — Low score triggers alert
-        // ================================================================
+        // TC25 — Daily check-in: low score sets emergency alert
         [Fact]
-        public async Task DailyCheckIn_LowScore_SetsEmergencyAlert()
+        public async Task TC25_DailyCheckIn_LowScore_SetsEmergencyAlert()
         {
             using var ctx = CreateContext();
             var user = new User { Email = "p@t.com", Password = "Pass1!", Role = "Patient" };
@@ -653,7 +648,6 @@ namespace _4Life.Tests
             ctx.Patients.Add(patient);
             await ctx.SaveChangesAsync();
 
-            // Simuleaza submit cu scor < 5
             int feelingScore = 3;
             string symptoms = "Headache, Fatigue";
 
@@ -670,8 +664,9 @@ namespace _4Life.Tests
             Assert.Contains("Check-in Alert", result.emergencyMessage);
         }
 
+        // TC26 — Daily check-in: high score does not trigger alert
         [Fact]
-        public async Task DailyCheckIn_HighScore_DoesNotTriggerAlert()
+        public async Task TC26_DailyCheckIn_HighScore_DoesNotTriggerAlert()
         {
             using var ctx = CreateContext();
             var user = new User { Email = "p@t.com", Password = "Pass1!", Role = "Patient" };
@@ -694,11 +689,9 @@ namespace _4Life.Tests
             Assert.True(result!.hasActiveAlert != true);
         }
 
-        // ================================================================
-        // DAILY CHECK-IN — Journal entry is saved
-        // ================================================================
+        // TC27 — Daily check-in: submission saves journal entry
         [Fact]
-        public async Task DailyCheckIn_Submit_SavesJournalEntry()
+        public async Task TC27_DailyCheckIn_Submit_SavesJournalEntry()
         {
             using var ctx = CreateContext();
             var user = new User { Email = "p@t.com", Password = "Pass1!", Role = "Patient" };
@@ -720,11 +713,9 @@ namespace _4Life.Tests
             Assert.StartsWith("[Daily Check-in", saved.JournalNotes);
         }
 
-        // ================================================================
-        // CHAT — Send message saves to database
-        // ================================================================
+        // TC28 — Chat: send message saved to database
         [Fact]
-        public async Task Chat_SendMessage_SavedToDatabase()
+        public async Task TC28_Chat_SendMessage_SavedToDatabase()
         {
             using var ctx = CreateContext();
 
@@ -756,11 +747,9 @@ namespace _4Life.Tests
             Assert.Equal("Patient", saved.SenderRole);
         }
 
-        // ================================================================
-        // CHAT — Load messages returns correct conversation
-        // ================================================================
+        // TC29 — Chat: load messages returns correct conversation
         [Fact]
-        public async Task Chat_LoadMessages_ReturnsCorrectConversation()
+        public async Task TC29_Chat_LoadMessages_ReturnsCorrectConversation()
         {
             using var ctx = CreateContext();
 
@@ -791,11 +780,9 @@ namespace _4Life.Tests
             Assert.Equal("Doctor", messages[1].SenderRole);
         }
 
-        // ================================================================
-        // SELECT DOCTORS — Patient assigned to multiple doctors
-        // ================================================================
+        // TC30 — Select doctors: assign multiple doctors saves all links
         [Fact]
-        public async Task SelectDoctors_AssignMultipleDoctors_SavesAllLinks()
+        public async Task TC30_SelectDoctors_AssignMultipleDoctors_SavesAllLinks()
         {
             using var ctx = CreateContext();
 
@@ -825,8 +812,9 @@ namespace _4Life.Tests
             Assert.Equal(2, links.Count);
         }
 
+        // TC31 — Select doctors: update selection removes old and adds new
         [Fact]
-        public async Task SelectDoctors_UpdateSelection_RemovesOldAndAddsNew()
+        public async Task TC31_SelectDoctors_UpdateSelection_RemovesOldAndAddsNew()
         {
             using var ctx = CreateContext();
 
@@ -843,11 +831,9 @@ namespace _4Life.Tests
             ctx.Doctors.AddRange(doctor1, doctor2);
             await ctx.SaveChangesAsync();
 
-            // Initial — doctor1
             ctx.PatientDoctors.Add(new PatientDoctor { PatientId = patient.Id, DoctorId = doctor1.Id });
             await ctx.SaveChangesAsync();
 
-            // Update — sterge toate si adauga doctor2
             var existing = await ctx.PatientDoctors.Where(pd => pd.PatientId == patient.Id).ToListAsync();
             ctx.PatientDoctors.RemoveRange(existing);
             ctx.PatientDoctors.Add(new PatientDoctor { PatientId = patient.Id, DoctorId = doctor2.Id });
@@ -858,11 +844,9 @@ namespace _4Life.Tests
             Assert.Equal(doctor2.Id, links[0].DoctorId);
         }
 
-        // ================================================================
-        // ADD OWN MEDICINE — Patient adds OTC medicine
-        // ================================================================
+        // TC32 — Add own medicine: saves with null doctor
         [Fact]
-        public async Task AddOwnMedicine_SavesWithNullDoctor()
+        public async Task TC32_AddOwnMedicine_SavesWithNullDoctor()
         {
             using var ctx = CreateContext();
             var user = new User { Email = "p@t.com", Password = "Pass1!", Role = "Patient" };
@@ -878,7 +862,7 @@ namespace _4Life.Tests
                 Name = "Vitamin C",
                 Dosage = "500mg",
                 PatientId = patient.Id,
-                PrescribedByDoctorId = null,  // adaugat de pacient, nu de doctor
+                PrescribedByDoctorId = null,
                 StockQuantity = 30,
                 ExpiryDate = DateTime.Now.AddYears(1),
                 TargetDate = DateTime.Now
@@ -891,8 +875,9 @@ namespace _4Life.Tests
             Assert.Null(saved.PrescribedByDoctorId);
         }
 
+        // TC33 — Add own medicine: build meal times correct string
         [Fact]
-        public void AddOwnMedicine_BuildMealTimes_CorrectString()
+        public void TC33_AddOwnMedicine_BuildMealTimes_CorrectString()
         {
             bool morning = true;
             bool lunch = false;
@@ -907,8 +892,9 @@ namespace _4Life.Tests
             Assert.Equal("Morning,Dinner", result);
         }
 
+        // TC34 — Add own medicine: no meal time selected fails validation
         [Fact]
-        public void AddOwnMedicine_NoMealTimeSelected_ValidationFails()
+        public void TC34_AddOwnMedicine_NoMealTimeSelected_ValidationFails()
         {
             bool morning = false;
             bool lunch = false;
@@ -923,11 +909,9 @@ namespace _4Life.Tests
             Assert.True(string.IsNullOrEmpty(mealTimes));
         }
 
-        // ================================================================
-        // ADMIN — Delete doctor reassigns patients
-        // ================================================================
+        // TC35 — Admin: delete doctor reassigns patients to replacement
         [Fact]
-        public async Task Admin_DeleteDoctor_PatientsReassignedToReplacement()
+        public async Task TC35_Admin_DeleteDoctor_PatientsReassignedToReplacement()
         {
             using var ctx = CreateContext();
 
@@ -948,7 +932,6 @@ namespace _4Life.Tests
             ctx.Patients.Update(patient);
             await ctx.SaveChangesAsync();
 
-            // Simuleaza delete doctor cu reatribuire
             var patients = await ctx.Patients.Where(p => p.DoctorId == doctor1.Id).ToListAsync();
             var rep = await ctx.Doctors.FirstOrDefaultAsync(d => d.Id != doctor1.Id && d.Specialization == doctor1.Specialization);
 
@@ -964,8 +947,9 @@ namespace _4Life.Tests
             Assert.Equal(replacement.Id, updatedPatient!.DoctorId);
         }
 
+        // TC36 — Admin: delete doctor with no replacement leaves patients unassigned
         [Fact]
-        public async Task Admin_DeleteDoctor_NoReplacement_PatientsUnassigned()
+        public async Task TC36_Admin_DeleteDoctor_NoReplacement_PatientsUnassigned()
         {
             using var ctx = CreateContext();
 
@@ -984,12 +968,11 @@ namespace _4Life.Tests
             ctx.Patients.Update(patient);
             await ctx.SaveChangesAsync();
 
-            // Nu exista alt doctor — pacientul ramane fara doctor
             var patients = await ctx.Patients.Where(p => p.DoctorId == doctor.Id).ToListAsync();
             var rep = await ctx.Doctors.FirstOrDefaultAsync(d => d.Id != doctor.Id);
 
             foreach (var p in patients)
-                p.DoctorId = rep?.Id;  // null
+                p.DoctorId = rep?.Id;
             ctx.Patients.UpdateRange(patients);
 
             var user = await ctx.Users.FindAsync(doctor.UserId);
@@ -1000,13 +983,10 @@ namespace _4Life.Tests
             Assert.Null(updatedPatient!.DoctorId);
         }
 
-        // ================================================================
-        // MEDICINE DATABASE — Search suggestions
-        // ================================================================
+        // TC37 — Medicine database: search by partial name returns matches
         [Fact]
-        public void MedicineDatabase_SearchByPartialName_ReturnsMatches()
+        public void TC37_MedicineDatabase_SearchByPartialName_ReturnsMatches()
         {
-            // Simuleaza logica de search din AddOwnMedicineViewModel / PrescribeViewModel
             string query = "par";
             var matches = MedicineDatabase.All
                 .Where(m => m.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
@@ -1017,8 +997,9 @@ namespace _4Life.Tests
             Assert.Contains(matches, m => m.Name == "Paracetamol");
         }
 
+        // TC38 — Medicine database: all categories not empty
         [Fact]
-        public void MedicineDatabase_AllCategories_NotEmpty()
+        public void TC38_MedicineDatabase_AllCategories_NotEmpty()
         {
             var categories = MedicineDatabase.Categories;
             Assert.NotEmpty(categories);
@@ -1026,19 +1007,18 @@ namespace _4Life.Tests
             Assert.Contains("Antibiotic", categories);
         }
 
+        // TC39 — Medicine database: stock default is thirty
         [Fact]
-        public void MedicineDatabase_StockDefault_IsThirty()
+        public void TC39_MedicineDatabase_StockDefault_IsThirty()
         {
             string initialStock = "abc";
             int stock = int.TryParse(initialStock, out int s) && s > 0 ? s : 30;
             Assert.Equal(30, stock);
         }
 
-        // ================================================================
-        // SYMPTOM JOURNAL — Manual notes vs check-in separation
-        // ================================================================
+        // TC40 — Symptom journal: separates manual notes from check-ins
         [Fact]
-        public void SymptomJournal_SeparatesManualNotesFromCheckIns()
+        public void TC40_SymptomJournal_SeparatesManualNotesFromCheckIns()
         {
             string journalNotes = "Durere de cap.\n\n[Daily Check-in — 19 May 2026]\nFeeling: 6/10";
 
@@ -1052,8 +1032,9 @@ namespace _4Life.Tests
             Assert.Equal("Durere de cap.", manual[0]);
         }
 
+        // TC41 — Symptom journal: save manual notes preserves check-ins
         [Fact]
-        public async Task SymptomJournal_SaveManualNotes_PreservesCheckIns()
+        public async Task TC41_SymptomJournal_SaveManualNotes_PreservesCheckIns()
         {
             using var ctx = CreateContext();
             var user = new User { Email = "p@t.com", Password = "Pass1!", Role = "Patient" };
@@ -1085,5 +1066,5 @@ namespace _4Life.Tests
             Assert.Contains("Ma simt mai bine azi.", saved!.JournalNotes);
             Assert.Contains("[Daily Check-in", saved.JournalNotes);
         }
-    } 
+    }
 }
